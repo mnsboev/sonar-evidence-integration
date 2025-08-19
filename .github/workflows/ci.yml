@@ -1,0 +1,54 @@
+name: CI with Sonar and Artifactory
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=misha-sonar
+            -Dsonar.projectKey=misha-sonar_integration
+
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        with:
+          version: latest
+
+      - name: Configure JFrog Artifactory
+        run: |
+          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server
+          jf mvn-config --repo-resolve-releases misha-maven --repo-deploy-releases misha-maven --server-id-resolve artifactory-server --server-id-deploy artifactory-server
+
+      - name: Build with Maven and publish to Artifactory
+        run: |
+          jf mvn clean install -Dmaven.test.skip=true
+          jf rt build-publish --build-name=hello-world-build --build-number=${{ github.run_number }}
