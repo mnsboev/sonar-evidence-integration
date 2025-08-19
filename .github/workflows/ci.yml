@@ -54,12 +54,8 @@ jobs:
         with:
           version: latest
 
-      - name: Configure JFrog Artifactory
-        run: |
-          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server
-          jf mvn-config --repo-resolve-releases misha-maven --repo-deploy-releases misha-maven --server-id-resolve artifactory-server --server-id-deploy artifactory-server
-
       - name: Build with Maven and publish to Artifactory
         run: |
+          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server
           jf mvn clean install -Dmaven.test.skip=true
           jf rt build-publish --build-name=hello-world-build --build-number=${{ github.run_number }}
