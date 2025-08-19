@@ -37,8 +37,6 @@ jobs:
           args: >
             -Dsonar.organization=misha-sonar
             -Dsonar.projectKey=integration
-      
-      
 
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v3
