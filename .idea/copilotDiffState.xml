@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/.github/workflows/ci.yml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/.github/workflows/ci.yml" />
+              <option name="originalContent" value="name: CI with Sonar and Artifactory&#10;&#10;on:&#10;  push:&#10;    branches: [ main ]&#10;  pull_request:&#10;    branches: [ main ]&#10;&#10;jobs:&#10;  build:&#10;    runs-on: ubuntu-latest&#10;    steps:&#10;      - name: Checkout code&#10;        uses: actions/checkout@v4&#10;&#10;      - name: Set up JDK 21&#10;        uses: actions/setup-java@v4&#10;        with:&#10;          distribution: 'temurin'&#10;          java-version: '21'&#10;&#10;      - name: Cache Maven packages&#10;        uses: actions/cache@v4&#10;        with:&#10;          path: ~/.m2/repository&#10;          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}&#10;          restore-keys: |&#10;            ${{ runner.os }}-maven-&#10;&#10;      - name: SonarQube Scan&#10;        uses: SonarSource/sonarcloud-github-action@v2&#10;        env:&#10;          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}&#10;          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}&#10;        with:&#10;          projectBaseDir: .&#10;          args: &gt;&#10;            -Dsonar.organization=misha-sonar&#10;            -Dsonar.projectKey=integration&#10;      &#10;      &#10;&#10;      - name: Set up JFrog CLI&#10;        uses: jfrog/setup-jfrog-cli@v3&#10;        with:&#10;          version: latest&#10;&#10;      - name: Configure JFrog Artifactory&#10;        run: |&#10;          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server&#10;          jf mvn-config --repo-resolve-releases misha-maven --repo-deploy-releases misha-maven --server-id-resolve artifactory-server --server-id-deploy artifactory-server&#10;&#10;      - name: Build with Maven and publish to Artifactory&#10;        run: |&#10;          jf mvn clean install -Dmaven.test.skip=true&#10;          jf rt build-publish --build-name=hello-world-build --build-number=${{ github.run_number }}&#10;" />
+              <option name="updatedContent" value="name: CI with Sonar and Artifactory&#10;&#10;on:&#10;  push:&#10;    branches: [ main ]&#10;  pull_request:&#10;    branches: [ main ]&#10;&#10;jobs:&#10;  build:&#10;    runs-on: ubuntu-latest&#10;    steps:&#10;      - name: Checkout code&#10;        uses: actions/checkout@v4&#10;&#10;      - name: Set up JDK 21&#10;        uses: actions/setup-java@v4&#10;        with:&#10;          distribution: 'temurin'&#10;          java-version: '21'&#10;&#10;      - name: Cache Maven packages&#10;        uses: actions/cache@v4&#10;        with:&#10;          path: ~/.m2/repository&#10;          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}&#10;          restore-keys: |&#10;            ${{ runner.os }}-maven-&#10;&#10;      - name: SonarQube Scan&#10;        uses: SonarSource/sonarcloud-github-action@v2&#10;        env:&#10;          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}&#10;          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}&#10;        with:&#10;          projectBaseDir: .&#10;          args: &gt;&#10;            -Dsonar.organization=misha-sonar&#10;            -Dsonar.projectKey=integration&#10;&#10;      - name: Set up JFrog CLI&#10;        uses: jfrog/setup-jfrog-cli@v3&#10;        with:&#10;          version: latest&#10;&#10;      - name: Configure JFrog Artifactory&#10;        run: |&#10;          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server&#10;          jf mvn-config --repo-resolve-releases misha-maven --repo-deploy-releases misha-maven --server-id-resolve artifactory-server --server-id-deploy artifactory-server&#10;&#10;      - name: Build with Maven and publish to Artifactory&#10;        run: |&#10;          jf mvn clean install -Dmaven.test.skip=true&#10;          jf rt build-publish --build-name=hello-world-build --build-number=${{ github.run_number }}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/pom.xml">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/pom.xml" />
+              <option name="originalContent" value="&#10;" />
+              <option name="updatedContent" value="&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;&#10;         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&#10;         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;&#10;    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;&#10;&#10;    &lt;groupId&gt;com.example&lt;/groupId&gt;&#10;    &lt;artifactId&gt;hello-world&lt;/artifactId&gt;&#10;    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;&#10;&#10;    &lt;properties&gt;&#10;        &lt;maven.compiler.source&gt;21&lt;/maven.compiler.source&gt;&#10;        &lt;maven.compiler.target&gt;21&lt;/maven.compiler.target&gt;&#10;    &lt;/properties&gt;&#10;&#10;    &lt;build&gt;&#10;        &lt;plugins&gt;&#10;            &lt;plugin&gt;&#10;                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;&#10;                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;&#10;                &lt;version&gt;3.8.1&lt;/version&gt;&#10;            &lt;/plugin&gt;&#10;        &lt;/plugins&gt;&#10;    &lt;/build&gt;&#10;&lt;/project&gt;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/main/java/com/example/HelloWorld.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/java/com/example/HelloWorld.java" />
+              <option name="updatedContent" value="package com.example;&#10;&#10;public class HelloWorld {&#10;    public static void main(String[] args) {&#10;        System.out.println(&quot;Hello, World!&quot;);&#10;    }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
