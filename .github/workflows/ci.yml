@@ -54,6 +54,10 @@ jobs:
         with:
           version: latest
 
+      - name: Configure JFrog Artifactory
+        run: |
+          jf mvn-config --repo-resolve-releases misha-maven --repo-deploy-releases misha-maven --server-id-resolve artifactory-server --server-id-deploy artifactory-server
+
       - name: Build with Maven and publish to Artifactory
         run: |
           jf mvn clean install -Dmaven.test.skip=true
