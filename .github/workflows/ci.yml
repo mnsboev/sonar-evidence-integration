@@ -60,5 +60,6 @@ jobs:
 
       - name: Build with Maven and publish to Artifactory
         run: |
+          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} artifactory-server
           jf mvn clean install -Dmaven.test.skip=true
           jf rt build-publish --build-name=hello-world-build --build-number=${{ github.run_number }}
