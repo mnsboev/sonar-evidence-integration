@@ -28,6 +28,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Debug Environment
+        run: |
+          echo "Checking if SONAR_TOKEN is available..."
+          if [ -n "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "SONAR_TOKEN is set (length: ${#SONAR_TOKEN})"
+          else
+            echo "SONAR_TOKEN is not set"
+          fi
+
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
@@ -39,6 +48,7 @@ jobs:
             -Dsonar.organization=misha-sonar
             -Dsonar.projectKey=integration
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v3
