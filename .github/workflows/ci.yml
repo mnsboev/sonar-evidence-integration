@@ -21,7 +21,7 @@ jobs:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: env.JFROG_URL
+          JF_URL: ${{ env.JFROG_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
