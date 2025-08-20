@@ -12,12 +12,10 @@ jobs:
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JFROG_URL: ${{ secrets.JFROG_URL }}
-          JFROG_USER: ${{ secrets.JFROG_USER }}
-          JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
         with:
           version: latest
+
+      - name: Test JFrog Connection
         run: |
           jf rt ping
           jf c show
