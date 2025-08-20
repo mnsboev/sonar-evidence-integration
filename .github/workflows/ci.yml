@@ -25,6 +25,7 @@ jobs:
       - name: Test JFrog Connection
         run: |
           jf c show
+          jf c use evidence-prod
           jf rt ping
           jf -v
           whereis jf
@@ -42,21 +43,25 @@ jobs:
           java -version
           echo "JAVA_HOME: $JAVA_HOME"
 
-#      - name: SonarQube Scan
-#        uses: SonarSource/sonarcloud-github-action@v2
-#        env:
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          projectBaseDir: .
-#          args: >
-#            -Dsonar.organization=misha-sonar
-#            -Dsonar.projectKey=misha-sonar_integration
-#            -Dsonar.host.url=https://sonarcloud.io
-#            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+     - name: SonarQube Scan
+       uses: SonarSource/sonarcloud-github-action@v2
+       env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+         projectBaseDir: .
+         args: >
+           -Dsonar.organization=misha-sonar
+           -Dsonar.projectKey=misha-sonar_integration
+           -Dsonar.host.url=https://sonarcloud.io
+           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Build with Maven and publish to Artifactory
         run: |
           jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
           jf c show
           jf mvn install
+
+      - name: Create evidence for build
+        run: |
+          jf evd create --build-name=CI with Sonar and Artifactory --build-number=${{ github.run_number }} --use-sonar-predicate
