@@ -6,12 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
-  jobs:
-    build:
-      runs-on: self-hosted
-      env:
-        JAVA_TOOL_OPTIONS: "-Dcom.sun.net.ssl.checkRevocation=false"
-        JFROG_CLI_INSECURE_TLS: "true"
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      JAVA_TOOL_OPTIONS: "-Dcom.sun.net.ssl.checkRevocation=false"
+      JFROG_CLI_INSECURE_TLS: "true"
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
