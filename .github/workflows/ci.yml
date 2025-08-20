@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ secrets.JFROG_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
+          custom-server-id: evidence-prod
           version: latest
-
-      - name: Configure JFrog Server
-        run: |
-          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} evidence-prod
 
       - name: Test JFrog Connection
         run: |
