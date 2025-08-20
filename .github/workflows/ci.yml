@@ -1,4 +1,4 @@
-name: CI with Sonar and Artifactory
+name: CI-with-Sonar-and-Artifactory
 
 on:
   push:
@@ -65,4 +65,4 @@ jobs:
 
       - name: Create evidence for build
         run: |
-          jf evd create --build-name "CI with Sonar and Artifactory" --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias RSA-EVD-MISHA
+          jf evd create --build-name CI-with-Sonar-and-Artifactory --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias RSA-EVD-MISHA
