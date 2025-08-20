@@ -17,11 +17,10 @@ jobs:
           JFROG_USER: ${{ secrets.JFROG_USER }}
           JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
         with:
-          jfrog-url: ${{ secrets.JFROG_URL }}
-          jfrog-user: ${{ secrets.JFROG_USER }}
-          jfrog-password: ${{ secrets.JFROG_PASSWORD }}
           version: latest
-          server-id: evidence-prod
+        run: |
+          jf rt ping
+          jf c show
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,7 +46,8 @@ jobs:
 
       - name: Configure JFrog Artifactory
         run: |
-          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
+          jf c add --url=${{ secrets.JFROG_URL }} --user=${{ secrets.JFROG_USER }} --password=${{ secrets.JFROG_PASSWORD }} evidence-prod
+          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod 
 
       - name: Build with Maven and publish to Artifactory
         run: |
