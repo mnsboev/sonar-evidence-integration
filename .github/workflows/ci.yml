@@ -17,13 +17,14 @@ jobs:
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
-          version: 2.77.3
+          version: 2.78.3
 
       - name: Test JFrog Connection
         run: |
           jf c show
           jf rt ping
           jf -v
+          whereis jf
 
       - name: Debug Artifactory Connection
         run: |
