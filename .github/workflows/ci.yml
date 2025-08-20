@@ -23,6 +23,7 @@ jobs:
         run: |
           jf c show
           jf rt ping
+          jf -v
 
       - name: Debug Artifactory Connection
         run: |
