@@ -21,6 +21,7 @@ jobs:
           jfrog-user: ${{ secrets.JFROG_USER }}
           jfrog-password: ${{ secrets.JFROG_PASSWORD }}
           version: latest
+          server-id: evidence-prod
 
       - name: Checkout code
         uses: actions/checkout@v4
