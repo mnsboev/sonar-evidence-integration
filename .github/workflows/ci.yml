@@ -13,6 +13,7 @@ jobs:
       JAVA_TOOL_OPTIONS: "-Dcom.sun.net.ssl.checkRevocation=false"
       JFROG_CLI_INSECURE_TLS: "true"
       JFROG_CLI_LOG_LEVEL: DEBUG
+      JFROG_URL: https://evidencetrial.jfrog.io
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       ACTIONS_STEP_DEBUG: true
       JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
@@ -20,7 +21,7 @@ jobs:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: ${{ secrets.JFROG_URL }}
+          JF_URL: env.JFROG_URL
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
@@ -37,7 +38,7 @@ jobs:
       - name: Debug Artifactory Connection
         run: |
           echo "Pinging Artifactory..."
-          curl -v -H "Authorization: Bearer ${{ secrets.JFROG_ACCESS_TOKEN }}" "${{ secrets.JFROG_URL }}/artifactory/api/system/ping"
+          curl -v -H "Authorization: Bearer ${{ secrets.JFROG_ACCESS_TOKEN }}" "${{ env.JFROG_URL }}/artifactory/api/system/ping"
 
       - name: Checkout code
         uses: actions/checkout@v4
