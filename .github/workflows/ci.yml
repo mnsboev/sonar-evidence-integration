@@ -62,7 +62,4 @@ jobs:
           jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
           jf c show
           jf mvn install
-
-      - name: Create evidence for build
-        run: |
           jf evd create --build-name CI-with-Sonar-and-Artifactory --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias RSA-EVD-MISHA
