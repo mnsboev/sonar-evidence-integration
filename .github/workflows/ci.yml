@@ -15,7 +15,7 @@ jobs:
       JFROG_CLI_LOG_LEVEL: DEBUG
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       ACTIONS_STEP_DEBUG: true
-      JFROG_CLI_SIGNING_KEY: /Users/misha/dev/bash/private.pem
+      JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
