@@ -1,0 +1,40 @@
+{
+  "version" : "1.0.1",
+  "name" : "hello-world",
+  "number" : "1755676398093",
+  "buildAgent" : {
+    "name" : "Maven",
+    "version" : "3.9.11"
+  },
+  "agent" : {
+    "name" : "/",
+    "version" : "3.9.11"
+  },
+  "started" : "2025-08-20T10:53:18.092+0300",
+  "durationMillis" : 5601,
+  "vcs" : [ ],
+  "modules" : [ {
+    "properties" : {
+      "maven.compiler.target" : "21",
+      "maven.compiler.source" : "21"
+    },
+    "type" : "maven",
+    "id" : "com.example:hello-world:1.0-SNAPSHOT",
+    "repository" : "misha-maven-libs-snapshot-local",
+    "artifacts" : [ {
+      "type" : "jar",
+      "sha1" : "496a52461f6aa1a34bd62e5250dde8dc7dd3239a",
+      "sha256" : "5f4c266e25ea81cfcd8d872b083912cd8ccc279f53193996bacb5311d3057ba2",
+      "md5" : "70356bd874bcf25d5bf52360ac091668",
+      "name" : "hello-world-1.0-SNAPSHOT.jar",
+      "path" : "com/example/hello-world/1.0-SNAPSHOT/hello-world-1.0-SNAPSHOT.jar"
+    }, {
+      "type" : "pom",
+      "sha1" : "016b4f0e4143173ffb1ae002053c28097bfd6892",
+      "sha256" : "42ab54280cea9f75c53e4ab8087f5ea990693e993052c3ae5275a9f6ef629b37",
+      "md5" : "95291bf43df3177a21521dba0050ab66",
+      "name" : "hello-world-1.0-SNAPSHOT.pom",
+      "path" : "com/example/hello-world/1.0-SNAPSHOT/hello-world-1.0-SNAPSHOT.pom"
+    } ]
+  } ]
+}

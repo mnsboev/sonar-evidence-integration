@@ -1,0 +1,10 @@
+version: 1
+type: maven
+resolver:
+    serverId: evidence-prod
+    snapshotRepo: misha-maven-maven-remote
+    releaseRepo: misha-maven-maven-remote
+deployer:
+    serverId: evidence-prod
+    snapshotRepo: misha-maven-libs-snapshot-local
+    releaseRepo: misha-maven-libs-release-local
