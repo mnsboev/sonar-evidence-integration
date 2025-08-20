@@ -24,6 +24,11 @@ jobs:
           jf c show
           jf rt ping
 
+      - name: Debug Artifactory Connection
+        run: |
+          echo "Pinging Artifactory..."
+          curl -v -H "Authorization: Bearer ${{ secrets.JFROG_ACCESS_TOKEN }}" "${{ secrets.JFROG_URL }}/artifactory/api/system/ping"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -33,23 +38,20 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=misha-sonar
-            -Dsonar.projectKey=misha-sonar_integration
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-      - name: Configure JFrog Artifactory
-        run: |
-          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod 
+#      - name: SonarQube Scan
+#        uses: SonarSource/sonarcloud-github-action@v2
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          projectBaseDir: .
+#          args: >
+#            -Dsonar.organization=misha-sonar
+#            -Dsonar.projectKey=misha-sonar_integration
+#            -Dsonar.host.url=https://sonarcloud.io
+#            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Build with Maven and publish to Artifactory
         run: |
+          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
           jf mvn install
