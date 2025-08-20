@@ -21,4 +21,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>evidencetrial-misha-maven-libs-release-releases</name>
+            <url>https://evidencetrial.jfrog.io/artifactory/misha-maven-libs-release</url>
+        </repository>
+    </distributionManagement>
 </project>
