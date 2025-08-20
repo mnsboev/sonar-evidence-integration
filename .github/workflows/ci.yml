@@ -12,6 +12,9 @@ jobs:
     env:
       JAVA_TOOL_OPTIONS: "-Dcom.sun.net.ssl.checkRevocation=false"
       JFROG_CLI_INSECURE_TLS: "true"
+      JFROG_CLI_LOG_LEVEL: DEBUG
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      ACTIONS_STEP_DEBUG: true
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
