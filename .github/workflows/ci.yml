@@ -91,7 +91,7 @@ jobs:
       - name: Restore JFrog config
         run: |
           mkdir -p ~/.jfrog
-          mv .jfrog/* ~/.jfrog/
+          cp -a .jfrog/* ~/.jfrog/
 
       - name: Publish to Artifactory and Create Evidence
         run: |
