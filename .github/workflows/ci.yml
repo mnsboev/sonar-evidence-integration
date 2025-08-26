@@ -30,10 +30,17 @@ jobs:
           custom-server-id: evidence-prod
           version: 2.78.3
 
+      - name: Import SonarCloud certificate
+        run: |
+          # Get the SonarCloud certificate
+          openssl s_client -showcerts -connect sonarcloud.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > sonarcloud.pem
+          # Create a new local truststore and import the certificate
+          keytool -import -alias sonarcloud -keystore sonar.truststore -file sonarcloud.pem -storepass changeit -noprompt
+
       - name: Configure Maven, Build, and Scan
         run: |
           jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
-          jf mvn install sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
+          jf mvn install sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }} -Djavax.net.ssl.trustStore=sonar.truststore -Djavax.net.ssl.trustStorePassword=changeit
 
       - name: Publish to Artifactory and Create Evidence
         run: |
