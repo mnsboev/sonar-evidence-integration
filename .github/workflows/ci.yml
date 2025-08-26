@@ -30,6 +30,14 @@ jobs:
           custom-server-id: evidence-prod
           version: 2.78.3
 
+      - name: Test JFrog Connection
+        run: |
+          jf c show
+          jf c use evidence-prod
+          jf rt ping
+          jf -v
+          whereis jf
+
       - name: Import SSL certificates
         run: |
           # Get the SonarCloud certificate
