@@ -14,9 +14,55 @@ jobs:
       JFROG_CLI_INSECURE_TLS: "true"
       JFROG_CLI_LOG_LEVEL: DEBUG
       JFROG_URL: https://evidencetrial.jfrog.io
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       ACTIONS_STEP_DEBUG: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ env.JFROG_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
+        with:
+          custom-server-id: evidence-prod
+          version: 2.78.3
+
+      - name: Configure Maven and Build
+        run: |
+          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
+          jf mvn install
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            target/
+            ~/.jfrog/
+            pom.xml
+
+  sonar_scan:
+    needs: build
+    runs-on: self-hosted
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: SonarQube Scan with Maven
+        run: mvn -B sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
+
+  publish:
+    needs: build
+    runs-on: self-hosted
+    env:
       JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
+      JFROG_URL: https://evidencetrial.jfrog.io
     steps:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
@@ -27,42 +73,18 @@ jobs:
           custom-server-id: evidence-prod
           version: 2.78.3
 
-      - name: Test JFrog Connection
-        run: |
-          jf c show
-          jf c use evidence-prod
-          jf rt ping
-          jf -v
-          whereis jf
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
 
-      - name: Debug Artifactory Connection
+      - name: Restore JFrog config
         run: |
-          echo "Pinging Artifactory..."
-          curl -v -H "Authorization: Bearer ${{ secrets.JFROG_ACCESS_TOKEN }}" "${{ env.JFROG_URL }}/artifactory/api/system/ping"
+          mkdir -p ~/.jfrog
+          cp -a .jfrog/* ~/.jfrog/
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check Java version
+      - name: Publish to Artifactory and Create Evidence
         run: |
-          java -version
-          echo "JAVA_HOME: $JAVA_HOME"
-
-      - name: SonarQube Scan
-        run: |
-          /opt/homebrew/Cellar/sonar-scanner/7.2.0.5079/bin/sonar-scanner \
-            -Dsonar.organization=misha-sonar \
-            -Dsonar.projectKey=misha-sonar_integration \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.sources=src \
-            -Dsonar.java.binaries=target/classes
-
-      - name: Build with Maven and publish to Artifactory
-        run: |
-          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
-          jf c show
-          jf mvn install
           jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
           jf evd create --build-name CI-with-Sonar-and-Artifactory --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias PUBLIC-MISHA
-
