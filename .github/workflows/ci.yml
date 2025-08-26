@@ -54,6 +54,16 @@ jobs:
           name: build-artifacts
           path: .
 
+      - name: Import SonarCloud certificate
+        run: |
+          # Get the SonarCloud certificate
+          openssl s_client -showcerts -connect sonarcloud.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > sonarcloud.pem
+          # Find the Java truststore
+          CACERTS_PATH=$(find $JAVA_HOME -name "cacerts")
+          echo "Found cacerts at: $CACERTS_PATH"
+          # Import the certificate
+          sudo keytool -import -alias sonarcloud -keystore "$CACERTS_PATH" -file sonarcloud.pem -storepass changeit -noprompt
+
       - name: SonarQube Scan with Maven
         run: mvn -B sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
 
