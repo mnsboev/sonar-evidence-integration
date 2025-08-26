@@ -30,12 +30,15 @@ jobs:
           custom-server-id: evidence-prod
           version: 2.78.3
 
-      - name: Import SonarCloud certificate
+      - name: Import SSL certificates
         run: |
           # Get the SonarCloud certificate
           openssl s_client -showcerts -connect sonarcloud.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > sonarcloud.pem
-          # Create a new local truststore and import the certificate
+          # Get the JFrog Artifactory certificate
+          openssl s_client -showcerts -connect evidencetrial.jfrog.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > jfrog.pem
+          # Create a new local truststore and import the certificates
           keytool -import -alias sonarcloud -keystore sonar.truststore -file sonarcloud.pem -storepass changeit -noprompt
+          keytool -import -alias jfrog -keystore sonar.truststore -file jfrog.pem -storepass changeit -noprompt
 
       - name: Configure Maven, Build, and Scan
         run: |
