@@ -14,7 +14,9 @@ jobs:
       JFROG_CLI_INSECURE_TLS: "true"
       JFROG_CLI_LOG_LEVEL: DEBUG
       JFROG_URL: https://evidencetrial.jfrog.io
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       ACTIONS_STEP_DEBUG: true
+      JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,71 +30,10 @@ jobs:
           custom-server-id: evidence-prod
           version: 2.78.3
 
-      - name: Configure Maven and Build
+      - name: Configure Maven, Build, and Scan
         run: |
           jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
-          jf mvn install
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            target/
-            ~/.jfrog/
-            pom.xml
-
-  sonar_scan:
-    needs: build
-    runs-on: self-hosted
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-
-      - name: Import SonarCloud certificate
-        run: |
-          # Get the SonarCloud certificate
-          openssl s_client -showcerts -connect sonarcloud.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > sonarcloud.pem
-          # Find the Java truststore
-          CACERTS_PATH=$(find $JAVA_HOME -name "cacerts")
-          echo "Found cacerts at: $CACERTS_PATH"
-          # Import the certificate
-          sudo keytool -import -alias sonarcloud -keystore "$CACERTS_PATH" -file sonarcloud.pem -storepass changeit -noprompt
-
-      - name: SonarQube Scan with Maven
-        run: mvn -B sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
-
-  publish:
-    needs: build
-    runs-on: self-hosted
-    env:
-      JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
-      JFROG_URL: https://evidencetrial.jfrog.io
-    steps:
-      - name: Set up JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JF_URL: ${{ env.JFROG_URL }}
-          JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
-        with:
-          custom-server-id: evidence-prod
-          version: 2.78.3
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-
-      - name: Restore JFrog config
-        run: |
-          mkdir -p ~/.jfrog
-          cp -a .jfrog/* ~/.jfrog/
+          jf mvn install sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
 
       - name: Publish to Artifactory and Create Evidence
         run: |
