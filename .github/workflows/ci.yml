@@ -57,4 +57,3 @@ jobs:
         run: |
           jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
           jf evd create --build-name CI-with-Sonar-and-Artifactory --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias PUBLIC-MISHA
-
