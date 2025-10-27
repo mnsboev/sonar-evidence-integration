@@ -8,15 +8,20 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     env:
-      JAVA_TOOL_OPTIONS: "-Dcom.sun.net.ssl.checkRevocation=false"
-      JFROG_CLI_INSECURE_TLS: "true"
       JFROG_CLI_LOG_LEVEL: DEBUG
       JFROG_URL: https://evidencetrial.jfrog.io
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       ACTIONS_STEP_DEBUG: true
-      JFROG_CLI_SIGNING_KEY: /Users/mishas/dev/bash/private.pem
+      JFROG_CLI_KEY_ALIAS: ${{ vars.JFROG_CLI_KEY_ALIAS }}
+      JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
+      DOCKER_IMAGE_NAME: evidencetrial.jfrog.io/misha-docker-local/hello-world
+      DOCKER_IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,7 +33,7 @@ jobs:
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
-          version: 2.78.3
+          version: latest
 
       - name: Test JFrog Connection
         run: |
@@ -37,24 +42,24 @@ jobs:
           jf rt ping
           jf -v
           whereis jf
-
-      - name: Import SSL certificates
-        run: |
-          # Get the SonarCloud certificate
-          openssl s_client -showcerts -connect sonarcloud.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > sonarcloud.pem
-          # Get the JFrog Artifactory certificate
-          openssl s_client -showcerts -connect evidencetrial.jfrog.io:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > jfrog.pem
-          # Create a new local truststore and import the certificates
-          keytool -import -alias sonarcloud -keystore sonar.truststore -file sonarcloud.pem -storepass changeit -noprompt
-          keytool -import -alias jfrog -keystore sonar.truststore -file jfrog.pem -storepass changeit -noprompt
+          jf rt docker-login
 
       - name: Configure Maven, Build, and Scan
         run: |
           jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
           jf mvn install sonar:sonar -Dsonar.login=${{ env.SONAR_TOKEN }} -Djavax.net.ssl.trustStore=sonar.truststore -Djavax.net.ssl.trustStorePassword=changeit
 
-      - name: Publish to Artifactory and Create Evidence
+      - name: Build, push Docker image to JFrog and publish build-info
+        id: build-and-push
         run: |
+          docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} .
+          jf rt docker-push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} misha-docker-local --build-name=CI-with-Sonar-and-Artifactory --build-number=${{ github.run_number }}
           jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
-          jf evd create --build-name CI-with-Sonar-and-Artifactory --build-number ${{ github.run_number }} --use-sonar-predicate --key-alias PUBLIC-MISHA
+          echo "digest=$(jf rt docker-manifest-inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} --format='json' | jq -r '.config.digest')" >> $GITHUB_OUTPUT
 
+      - name: Generate docker attestation
+        uses: actions/attest-build-provenance@v2
+        id: attest-provenance
+        with:
+          subject-name: oci://${{ env.DOCKER_IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
