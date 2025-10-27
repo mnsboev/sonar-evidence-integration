@@ -57,11 +57,18 @@ jobs:
       - name: Build, push Docker image to JFrog and publish build-info
         id: build-and-push
         run: |
+          set -x
           docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} .
+          
           jf rt docker-push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} misha-docker-local --build-name=CI-with-Sonar-and-Artifactory --build-number=${{ github.run_number }}
+          
           jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
-          DIGEST=$(jf rt docker-manifest-inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} --format='json' | sed -n '/^{/,$p' | jq -r '.config.digest')
+
+          DIGEST=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} | cut -d'@' -f2)
+          echo "Extracted digest: $DIGEST"
+
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          set +x
 
       - name: Generate docker attestation
         uses: actions/attest-build-provenance@v2
