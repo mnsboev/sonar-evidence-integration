@@ -42,7 +42,6 @@ jobs:
           jf rt ping
           jf -v
           whereis jf
-          jf rt docker-login
 
       - name: Configure Maven, Build, and Scan
         run: |
