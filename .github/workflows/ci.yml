@@ -60,7 +60,8 @@ jobs:
           docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} .
           jf rt docker-push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} misha-docker-local --build-name=CI-with-Sonar-and-Artifactory --build-number=${{ github.run_number }}
           jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
-          echo "digest=$(jf rt docker-manifest-inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} --format='json' | jq -r '.config.digest')" >> $GITHUB_OUTPUT
+          DIGEST=$(jf rt docker-manifest-inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} --format='json' | sed -n '/^{/,$p' | jq -r '.config.digest')
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Generate docker attestation
         uses: actions/attest-build-provenance@v2
