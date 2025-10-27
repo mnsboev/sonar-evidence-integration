@@ -1,5 +1,5 @@
 # Use an official Maven image to build the application
-FROM maven:3.8.5-openjdk-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
 # Set the working directory
 WORKDIR /app
@@ -27,4 +27,3 @@ COPY --from=build /app/target/hello-world-1.0-SNAPSHOT.jar .
 
 # Set the command to run the application
 CMD ["java", "-jar", "hello-world-1.0-SNAPSHOT.jar"]
-
