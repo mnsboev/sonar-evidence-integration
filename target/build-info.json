@@ -1,7 +1,7 @@
 {
   "version" : "1.0.1",
-  "name" : "hello-world",
-  "number" : "1755676398093",
+  "name" : "CI-with-Sonar-and-Artifactory",
+  "number" : "1",
   "buildAgent" : {
     "name" : "Maven",
     "version" : "3.9.11"
@@ -10,29 +10,31 @@
     "name" : "/",
     "version" : "3.9.11"
   },
-  "started" : "2025-08-20T10:53:18.092+0300",
-  "durationMillis" : 5601,
+  "started" : "2025-09-09T15:27:30.019+0300",
+  "durationMillis" : 686,
   "vcs" : [ ],
   "modules" : [ {
     "properties" : {
       "maven.compiler.target" : "21",
-      "maven.compiler.source" : "21"
+      "maven.compiler.source" : "21",
+      "sonar.host.url" : "https://sonarcloud.io",
+      "sonar.organization" : "misha-sonar"
     },
     "type" : "maven",
     "id" : "com.example:hello-world:1.0-SNAPSHOT",
     "repository" : "misha-maven-libs-snapshot-local",
     "artifacts" : [ {
       "type" : "jar",
-      "sha1" : "496a52461f6aa1a34bd62e5250dde8dc7dd3239a",
-      "sha256" : "5f4c266e25ea81cfcd8d872b083912cd8ccc279f53193996bacb5311d3057ba2",
-      "md5" : "70356bd874bcf25d5bf52360ac091668",
+      "sha1" : "90fa0320a327613d24596c31a2490dd8ed5d66b8",
+      "sha256" : "20c2a4eae196235181bc8c44df7e7ad6fc522f0c116714b8ad114ac072c35d94",
+      "md5" : "c46ea73a42131b39826411b611f97e54",
       "name" : "hello-world-1.0-SNAPSHOT.jar",
       "path" : "com/example/hello-world/1.0-SNAPSHOT/hello-world-1.0-SNAPSHOT.jar"
     }, {
       "type" : "pom",
-      "sha1" : "016b4f0e4143173ffb1ae002053c28097bfd6892",
-      "sha256" : "42ab54280cea9f75c53e4ab8087f5ea990693e993052c3ae5275a9f6ef629b37",
-      "md5" : "95291bf43df3177a21521dba0050ab66",
+      "sha1" : "04c0b7bc42dd52dfe84bac1d69858d751d0ed0b3",
+      "sha256" : "e840d9fb6753e4bc590a947b761f26e213b962d7309245d6411548f7dbe54aaa",
+      "md5" : "d1a74657ee2e92ecd3eba7608d3408cc",
       "name" : "hello-world-1.0-SNAPSHOT.pom",
       "path" : "com/example/hello-world/1.0-SNAPSHOT/hello-world-1.0-SNAPSHOT.pom"
     } ]

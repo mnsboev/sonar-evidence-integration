@@ -73,8 +73,6 @@ jobs:
 
       - name: Generate docker attestation
         uses: actions/attest-build-provenance@v2
-        env:
-          INPUT_PRIVATE-SIGNING: true
         id: attest-provenance
         with:
           subject-name: oci://${{ env.DOCKER_IMAGE_NAME }}
