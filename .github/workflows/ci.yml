@@ -1,4 +1,4 @@
-name: CI-with-Sonar-and-Artifactory
+name: Test SonarQube Evidence Integration
 
 on:
   push:
@@ -7,31 +7,21 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test-sonar-evidence:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
       id-token: write
-      attestations: write
     env:
-      JFROG_CLI_LOG_LEVEL: DEBUG
-      JFROG_URL: https://evidencetrial.jfrog.io
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      ACTIONS_STEP_DEBUG: true
+      SONAR_URL: ${{ secrets.SONAR_URL }}
+      JFROG_URL: ${{ secrets.JFROG_URL }}
+      JFROG_CLI_LOG_LEVEL: DEBUG
       JFROG_CLI_KEY_ALIAS: ${{ vars.JFROG_CLI_KEY_ALIAS }}
       JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-      DOCKER_IMAGE_NAME: evidencetrial.jfrog.io/misha-docker-local/hello-world
-      DOCKER_IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
 
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
@@ -48,32 +38,46 @@ jobs:
           jf c use evidence-prod
           jf rt ping
           jf -v
-          whereis jf
 
-      - name: Configure Maven, Build, and Scan
+      - name: Test SonarQube Evidence - Passing Quality Gate
+        env:
+          SONAR_REPORT_TASK_FILE: /tmp/report-task-pass.txt
         run: |
-          jf mvn-config --repo-deploy-snapshots misha-maven-libs-snapshot-local --repo-deploy-releases misha-maven-libs-release-local --repo-resolve-snapshots misha-maven-maven-remote --repo-resolve-releases misha-maven-maven-remote --server-id-deploy evidence-prod --server-id-resolve evidence-prod
-          jf mvn install
+          echo "Creating report-task.txt for passing quality gate..."
+          cat > $SONAR_REPORT_TASK_FILE << EOF
+          projectKey=js-test
+          serverUrl=${{ secrets.SONAR_URL }}
+          ceTaskId=${{ secrets.SONAR_TASK_UUID_PASS }}
+          EOF
+          
+          echo "Testing Passing Quality Gate (main branch)..."
+          jf evd create \
+            --integration=sonar \
+            --subject-repo-path=misha-docker-local/hello-world/92f8f121555eb75ba76b2ba43d9740d9928adfd3/manifest.json \
+            --key="${{ secrets.JFROG_CLI_SIGNING_KEY }}" \
+            --key-alias="${{ vars.JFROG_CLI_KEY_ALIAS }}" \
+            --server-id=evidence-prod
+          
+          echo "✅ Passing Quality Gate test successful"
 
-      - name: Build, push Docker image to JFrog and publish build-info
-        id: build-and-push
+      - name: Test SonarQube Evidence - Failing Quality Gate
+        env:
+          SONAR_REPORT_TASK_FILE: /tmp/report-task-fail.txt
         run: |
-          set -x
-          docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} .
+          echo "Creating report-task.txt for failing quality gate..."
+          cat > $SONAR_REPORT_TASK_FILE << EOF
+          projectKey=js-test
+          serverUrl=${{ secrets.SONAR_URL }}
+          ceTaskId=${{ secrets.SONAR_TASK_UUID_FAIL }}
+          EOF
           
-          jf rt docker-push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} misha-docker-local --build-name=CI-with-Sonar-and-Artifactory --build-number=${{ github.run_number }}
+          echo "Testing Failing Quality Gate (PR)..."
+          # This should succeed in creating evidence even with a failing quality gate
+          jf evd create \
+            --integration=sonar \
+            --subject-repo-path=misha-docker-local/hello-world/92f8f121555eb75ba76b2ba43d9740d9928adfd3/manifest.json \
+            --key="${{ secrets.JFROG_CLI_SIGNING_KEY }}" \
+            --key-alias="${{ vars.JFROG_CLI_KEY_ALIAS }}" \
+            --server-id=evidence-prod
           
-          jf rt build-publish CI-with-Sonar-and-Artifactory ${{ github.run_number }}
-
-          DIGEST=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} | cut -d'@' -f2)
-          echo "Extracted digest: $DIGEST"
-
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-          set +x
-
-      - name: Generate docker attestation
-        uses: actions/attest-build-provenance@v2
-        id: attest-provenance
-        with:
-          subject-name: oci://${{ env.DOCKER_IMAGE_NAME }}
-          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+          echo "✅ Failing Quality Gate test successful"
