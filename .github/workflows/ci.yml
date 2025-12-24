@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-sonar-evidence:
-    runs-on: ubuntu-latest
+    runs-on: mishas-mac
     permissions:
       contents: read
       id-token: write
@@ -30,7 +30,7 @@ jobs:
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
-          version: latest
+          version: 2.78.10
 
       - name: Test JFrog Connection
         run: |
