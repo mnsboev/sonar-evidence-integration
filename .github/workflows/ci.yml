@@ -50,6 +50,10 @@ jobs:
           ceTaskId=${{ secrets.SONAR_TASK_UUID_PASS }}
           EOF
           
+          echo "Configuring JFrog server..."
+          jf c add evidence-prod --url=${{ secrets.JFROG_URL }} --access-token=${{ secrets.JFROG_ACCESS_TOKEN }} --overwrite --interactive=false
+          jf c use evidence-prod
+          
           echo "Testing Passing Quality Gate (main branch)..."
           jf evd create \
             --integration=sonar \
@@ -70,6 +74,10 @@ jobs:
           serverUrl=${{ secrets.SONAR_URL }}
           ceTaskId=${{ secrets.SONAR_TASK_UUID_FAIL }}
           EOF
+          
+          echo "Configuring JFrog server..."
+          jf c add evidence-prod --url=${{ secrets.JFROG_URL }} --access-token=${{ secrets.JFROG_ACCESS_TOKEN }} --overwrite --interactive=false
+          jf c use evidence-prod
           
           echo "Testing Failing Quality Gate (PR)..."
           # This should succeed in creating evidence even with a failing quality gate
