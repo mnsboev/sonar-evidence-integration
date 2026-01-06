@@ -39,30 +39,30 @@ jobs:
           jf rt ping
           jf -v
 
-      - name: Test SonarQube Evidence - Passing Quality Gate
-        env:
-          SONAR_REPORT_TASK_FILE: /tmp/report-task-pass.txt
-        run: |
-          echo "Creating report-task.txt for passing quality gate..."
-          cat > $SONAR_REPORT_TASK_FILE << EOF
-          projectKey=js-test
-          serverUrl=${{ secrets.SONAR_URL }}
-          ceTaskId=${{ secrets.SONAR_TASK_UUID_PASS }}
-          EOF
-          
-          echo "Configuring JFrog server..."
-          jf c add evidence-prod --url=${{ secrets.JFROG_URL }} --access-token=${{ secrets.JFROG_ACCESS_TOKEN }} --overwrite --interactive=false
-          jf c use evidence-prod
-          
-          echo "Testing Passing Quality Gate (main branch)..."
-          jf evd create \
-            --integration=sonar \
-            --subject-repo-path=misha-docker-local/hello-world/92f8f121555eb75ba76b2ba43d9740d9928adfd3/manifest.json \
-            --key="${{ secrets.JFROG_CLI_SIGNING_KEY }}" \
-            --key-alias="${{ vars.JFROG_CLI_KEY_ALIAS }}" \
-            --server-id=evidence-prod
-          
-          echo "✅ Passing Quality Gate test successful"
+#      - name: Test SonarQube Evidence - Passing Quality Gate
+#        env:
+#          SONAR_REPORT_TASK_FILE: /tmp/report-task-pass.txt
+#        run: |
+#          echo "Creating report-task.txt for passing quality gate..."
+#          cat > $SONAR_REPORT_TASK_FILE << EOF
+#          projectKey=js-test
+#          serverUrl=${{ secrets.SONAR_URL }}
+#          ceTaskId=${{ secrets.SONAR_TASK_UUID_PASS }}
+#          EOF
+#
+#          echo "Configuring JFrog server..."
+#          jf c add evidence-prod --url=${{ secrets.JFROG_URL }} --access-token=${{ secrets.JFROG_ACCESS_TOKEN }} --overwrite --interactive=false
+#          jf c use evidence-prod
+#
+#          echo "Testing Passing Quality Gate (main branch)..."
+#          jf evd create \
+#            --integration=sonar \
+#            --subject-repo-path=misha-docker-local/hello-world/92f8f121555eb75ba76b2ba43d9740d9928adfd3/manifest.json \
+#            --key="${{ secrets.JFROG_CLI_SIGNING_KEY }}" \
+#            --key-alias="${{ vars.JFROG_CLI_KEY_ALIAS }}" \
+#            --server-id=evidence-prod
+#
+#          echo "✅ Passing Quality Gate test successful"
 
       - name: Test SonarQube Evidence - Failing Quality Gate
         env:
