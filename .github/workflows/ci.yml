@@ -30,7 +30,7 @@ jobs:
           JF_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
         with:
           custom-server-id: evidence-prod
-          version: 2.78.10
+          version: 2.87.0
 
       - name: Test JFrog Connection
         run: |
